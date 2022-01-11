@@ -36,7 +36,7 @@ def strong_rule(X,θ1star, λ1, λ2, tol=10^(-9)):
     """
     return np.where(((λ1/λ2)*np.abs(np.dot(X.T,θ1star)) + ((λ1/λ2) -1))<1-tol)
 
-def safe_screening(X,y,θ1star, λ1, tol=10^(-9)):
+def safe_screening(X,y,θ1star, λ2, tol=10^(-9)):
     """
     Safe screening method.
 
@@ -57,8 +57,8 @@ def safe_screening(X,y,θ1star, λ1, tol=10^(-9)):
         The vector containing the model coefficients of the LASSO model 
         defined on X for the design matrix and lamb_before for the regularization 
         parameter
-    λ1 : float
-        The regularization parameter of the precedent model
+    λ2 : float
+        The regularization parameter of the model
     tol : float (default is 10e-9)
         Tolerance for the inequality
 
@@ -68,8 +68,8 @@ def safe_screening(X,y,θ1star, λ1, tol=10^(-9)):
         The number of the features j if the scalar product |<x_j, theta_before>| < 1 for all the features j in [1,...,j]
     """
 
-    s_star = np.max([np.min([np.dot(θ1star.T,y)/(λ1*np.linalg.norm(θ1star)),1]),-1])
-    return np.where((np.abs(np.dot(X.T,y))/λ1 + np.linalg.norm(X,axis=0)*np.linalg.norm(s_star*θ1star-y/λ1))<1-tol)
+    s_star = np.max([np.min([np.dot(θ1star.T,y)/(λ2*np.linalg.norm(θ1star)),1]),-1])
+    return np.where((np.abs(np.dot(X.T,y))/λ2 + np.linalg.norm(X,axis=0)*np.linalg.norm(s_star*θ1star-y/λ2))<1-tol)
 
 # Implementation of the Sasvi method
 
@@ -134,7 +134,7 @@ def y_ort(y,a):
     """
     return(y-a*np.dot(y,a)/(np.linalg.norm(a)**2))
 
-def sasvi(X,a,b,λ1,λ2, θ1star, Xort, yort, tol=10^(-9)):
+def sasvi(X,y,a,b,λ1,λ2, θ1star, tol=10^(-9)):
     """
     Sasvi screening method
 
@@ -148,6 +148,8 @@ def sasvi(X,a,b,λ1,λ2, θ1star, Xort, yort, tol=10^(-9)):
     X : np.ndarray of shape (n,p)
         Input design matrix. n is the number of elements 
         and p the number of features
+    y : np.ndarray of shape (n)
+        The response vector 
     a : float
         Parameter from the article
     b : float 
@@ -160,10 +162,6 @@ def sasvi(X,a,b,λ1,λ2, θ1star, Xort, yort, tol=10^(-9)):
         The vector containing the model coefficients of the LASSO model 
         defined on X for the design matrix and lamb_before for the regularization 
         parameter
-    Xort : np.ndarray of shape (n,p)
-        Orthogonal matrix of X
-    yort : np.ndarray of shape (n)
-        Vector orthogonal to the response vector y
     tol : float (default is 10e-9)
         Tolerance for the inequality
 
@@ -180,7 +178,11 @@ def sasvi(X,a,b,λ1,λ2, θ1star, Xort, yort, tol=10^(-9)):
     Xttheta = np.dot(X.T,θ1star)
 
     #Case 1
-    if((np.linalg.norm(a)/float(a.size)) < tol):
+    if((np.linalg.norm(a)/float(a.size)) > tol):
+
+        #Computatioon of xort and yort
+        yort=y_ort(y,a)
+        Xort=x_ort(X,a)
         
         # Computation of algebra operations
         Xta = np.dot(X.T,a)
