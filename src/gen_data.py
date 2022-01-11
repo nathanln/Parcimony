@@ -48,7 +48,7 @@ def gen_data_PIE():
         The image selected.
     """
 
-    list_files = ["/data/PIE/PIE05.mat","/data/PIE/PIE07.mat","/data/PIE/PIE09.mat","/data/PIE/PIE27.mat","data/PIE/PIE29.mat"]
+    list_files = ["data/PIE/PIE05.mat","data/PIE/PIE07.mat","data/PIE/PIE09.mat","data/PIE/PIE27.mat","data/PIE/PIE29.mat"]
     X = np.zeros((1024,11554))
     rows = 0
     for files in list_files:

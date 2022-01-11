@@ -2,7 +2,7 @@ import numpy as np
 
 #Implementation of existing approaches
 
-def strong_rule(X,θ1star, λ1, λ2, tol=10^(-9)):
+def strong_rule(X,θ1star, λ1, λ2, tol=10**(-9)):
     """
     Strong rule algorithm.
 
@@ -34,9 +34,9 @@ def strong_rule(X,θ1star, λ1, λ2, tol=10^(-9)):
     np.ndarray of shape (p):
         The number of the features j if the scalar product |<x_j, theta_before>| < 1 for all the features j in [1,...,j]
     """
-    return np.where(((λ1/λ2)*np.abs(np.dot(X.T,θ1star)) + ((λ1/λ2) -1))<1-tol)
+    return np.where(((λ1/λ2)*np.abs(np.dot(X.T,θ1star)) + ((λ1/λ2) -1))<1+tol)
 
-def safe_screening(X,y,θ1star, λ2, tol=10^(-9)):
+def safe_screening(X,y,θ1star, λ2, tol=10**(-9)):
     """
     Safe screening method.
 
@@ -68,9 +68,15 @@ def safe_screening(X,y,θ1star, λ2, tol=10^(-9)):
         The number of the features j if the scalar product |<x_j, theta_before>| < 1 for all the features j in [1,...,j]
     """
 
-    s_star = np.max([np.min([np.dot(θ1star.T,y)/(λ2*np.linalg.norm(θ1star)),1]),-1])
-    return np.where((np.abs(np.dot(X.T,y))/λ2 + np.linalg.norm(X,axis=0)*np.linalg.norm(s_star*θ1star-y/λ2))<1-tol)
+    s_star = np.max([np.min([np.dot(θ1star.T,y)/(λ2*np.linalg.norm(θ1star, ord=2)),1]),-1])
+    return np.where((np.abs(np.dot(X.T,y))/λ2 + np.linalg.norm(X,ord=2,axis=0)*np.linalg.norm(s_star*θ1star-y/λ2, ord=2))<1+tol)
 
+
+def safe_screening2(X,y,λ1,λ2,tol=10**(-9)):
+    lhs = np.abs(X.T.dot(y))
+    rhs = λ2 - np.linalg.norm(X,axis=0) * np.linalg.norm(y) * (λ1 - λ2)/λ1
+    inds = np.where(lhs < rhs + tol)
+    return inds
 # Implementation of the Sasvi method
 
 def get_parameter(y , λ, θ1star):
@@ -134,7 +140,7 @@ def y_ort(y,a):
     """
     return(y-a*np.dot(y,a)/(np.linalg.norm(a)**2))
 
-def sasvi(X,y,a,b,λ1,λ2, θ1star, tol=10^(-9)):
+def sasvi(X,y,a,b,λ1,λ2, θ1star, tol=10**(-9)):
     """
     Sasvi screening method
 
@@ -206,5 +212,5 @@ def sasvi(X,y,a,b,λ1,λ2, θ1star, tol=10^(-9)):
         uminus=(-Xttheta+1/2*(normX*normb-Xtb))
         uplus=(Xttheta+1/2*(normX*normb+Xtb))
         
-    return(np.where((uplus<1-tol) & (uminus<1-tol)))
+    return(np.where((uplus<1+tol) & (uminus<1+tol)))
 
