@@ -59,5 +59,7 @@ def gen_data_PIE():
     indy = random.sample(range(11554),1)
     y = X[:,indy].reshape(-1)
     X = np.delete(X, indy, 1)
+    indx = random.sample(range(11553),11553)
+    X = X[:,indx]
 
     return (X,y)

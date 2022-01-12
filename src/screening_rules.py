@@ -36,7 +36,7 @@ def strong_rule(X,θ1star, λ1, λ2, tol=10**(-9)):
     """
     return np.where(((λ1/λ2)*np.abs(np.dot(X.T,θ1star)) + ((λ1/λ2) -1))<1+tol)
 
-def safe_screening(X,y,θ1star, λ2, tol=10**(-9)):
+def safe_screening(X,y,λ1, λ2, tol=10**(-9)):
     """
     Safe screening method.
 
@@ -53,10 +53,8 @@ def safe_screening(X,y,θ1star, λ2, tol=10**(-9)):
         and p the number of features
     y : np.ndarray of shape (n)
         The response vector
-    θ1star : np.ndarray of shape (p)
-        The vector containing the model coefficients of the LASSO model 
-        defined on X for the design matrix and lamb_before for the regularization 
-        parameter
+    λ1 : float
+        The regularization parameter of the precedent model
     λ2 : float
         The regularization parameter of the model
     tol : float (default is 10e-9)
@@ -67,16 +65,9 @@ def safe_screening(X,y,θ1star, λ2, tol=10**(-9)):
     np.ndarray of shape (p):
         The number of the features j if the scalar product |<x_j, theta_before>| < 1 for all the features j in [1,...,j]
     """
+    rho = (np.linalg.norm(y)*np.linalg.norm(X,axis=0) + np.abs(np.dot(X.T,y)))/(np.linalg.norm(y)*np.linalg.norm(X,axis=0)+λ1)
+    return np.where(λ2 > rho*λ1 - tol)
 
-    s_star = np.max([np.min([np.dot(θ1star.T,y)/(λ2*np.linalg.norm(θ1star, ord=2)),1]),-1])
-    return np.where((np.abs(np.dot(X.T,y))/λ2 + np.linalg.norm(X,ord=2,axis=0)*np.linalg.norm(s_star*θ1star-y/λ2, ord=2))<1+tol)
-
-
-def safe_screening2(X,y,λ1,λ2,tol=10**(-9)):
-    lhs = np.abs(X.T.dot(y))
-    rhs = λ2 - np.linalg.norm(X,axis=0) * np.linalg.norm(y) * (λ1 - λ2)/λ1
-    inds = np.where(lhs < rhs + tol)
-    return inds
 # Implementation of the Sasvi method
 
 def get_parameter(y , λ, θ1star):
